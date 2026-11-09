@@ -1,0 +1,2 @@
+{"timestamp":"2026-11-08T02:00:00Z","type":"session_meta","payload":{"id":"synthetic-unsupported","cli_version":"0.163.0","source":"cli","originator":"codex-tui","cwd":"/sample/unsupported"}}
+{"timestamp":"2026-11-08T02:00:01Z","type":"event_msg","payload":{"type":"task_started"}}

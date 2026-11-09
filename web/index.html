@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Codex companion</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+<header><strong>Codex companion</strong><span>Local recorded evidence</span></header>
+<p class="notice">Recorded exposure does not establish current context residency or verified understanding.</p>
+<main>
+  <aside aria-label="Context selection">
+    <h2>Contexts</h2>
+    <p>Choose a recorded session to inspect.</p>
+    <button id="new-import-context" type="button">New import context</button>
+    <button id="refresh" type="button">Refresh</button>
+    <p id="list-status" role="status">Loading contexts…</p>
+    <p class="muted">Saved reports are grouped by explicit task reference, then session and context. Refresh collects saved reports and recorded activity.</p>
+    <nav id="sessions" aria-label="Recorded sessions"></nav>
+  </aside>
+  <article>
+    <h1 id="title" tabindex="-1">Choose a context</h1>
+    <p id="view-status" role="status">Select a session from the list. Each session starts a separate context.</p>
+    <div id="detail" hidden>
+      <label for="understanding-stream">Understanding stream</label>
+      <select id="understanding-stream"><option value="files">Saved files</option><option value="log-import">Log / imports</option></select>
+      <p id="file-provenance" class="muted"></p>
+      <details id="context-target-panel" hidden><summary>Explicit context target for snapshot-session</summary>
+        <textarea id="context-target" readonly rows="4" aria-label="Explicit context target"></textarea>
+        <button id="copy-target" type="button">Copy context target</button><p id="target-status" role="status"></p>
+      </details>
+      <dl id="metadata"></dl>
+      <section class="warnings" aria-label="Coverage limits"><h2>Coverage and uncertainty</h2><ul id="warnings"></ul></section>
+      <section id="understanding" class="snapshot-panel" aria-label="Understanding snapshot">
+        <h2>Understanding snapshot</h2>
+        <p class="muted">Agent self-report and user imports. Ordinary activity cannot update understanding or verify it.</p>
+        <p id="snapshot-empty">No valid snapshot yet. Copy the request below into the existing Codex conversation, or import a snapshot.</p>
+        <p id="snapshot-time" role="status"></p>
+        <div id="snapshot-current" hidden>
+          <h3 id="goal-objective"></h3>
+          <div class="shared"><strong>Shared constraints</strong><ul id="shared-constraints"></ul></div>
+          <nav id="subtask-nav" aria-label="Goal and subtask selection"></nav>
+          <div id="snapshot-content"></div>
+        </div>
+        <section id="snapshot-errors" class="warnings" hidden aria-label="Snapshot validation errors"></section>
+        <details><summary>Snapshot history and superseded content</summary><div id="snapshot-history"></div>
+          <button id="history-first" type="button" hidden>Newest reports</button>
+          <button id="history-next" type="button" hidden>Older reports</button><p id="history-status" role="status"></p>
+        </details>
+        <details id="snapshot-request"><summary>Snapshot request and schema v1 example</summary>
+          <label for="snapshot-instruction">Paste this request into the existing Codex conversation.</label>
+          <textarea id="snapshot-instruction" readonly rows="10"></textarea>
+          <button id="copy-request" type="button">Copy snapshot request</button><p id="copy-request-status" role="status"></p>
+        </details>
+        <details id="import-panel"><summary>Import snapshot JSON</summary>
+          <p>Imports have local receipt times and unknown log provenance. Service restart loses all imports and independent import contexts.</p>
+          <form id="import-form"><label for="import-json">Schema v1 JSON (maximum 64 KiB)</label>
+            <textarea id="import-json" required rows="8" spellcheck="false"></textarea>
+            <button type="submit">Import snapshot</button><p id="import-status" role="status"></p>
+          </form>
+        </details>
+      </section>
+      <section class="snapshot-panel" aria-label="Sources">
+        <h2>Sources</h2>
+        <p>Explicit references scope sources to the selected goal or subtask. No linked claim means relevance is unknown. Captured records do not prove current residency; current files are never substituted.</p>
+        <div id="sources"></div>
+        <details><summary>Unassigned sources — relevance unknown</summary><div id="unassigned-sources"></div></details>
+      </section>
+      <section id="correction-panel" class="snapshot-panel" aria-label="Scoped clarification" hidden>
+        <h2>Clarification to copy</h2>
+        <p id="correction-target"></p>
+        <label for="correction-text">Edit your correction and requested check before copying into the existing Codex conversation.</label>
+        <textarea id="correction-text" rows="12"></textarea>
+        <button id="copy-correction" type="button">Copy clarification</button>
+        <p id="correction-status" role="status">Draft only. Sending, acknowledgment and behavior verification are unknown.</p>
+      </section>
+      <section aria-label="Evidence paging and boundaries">
+        <button id="first-page" type="button">First evidence page</button>
+        <button id="next-page" type="button">Next evidence page</button>
+        <p id="page-status" role="status"></p>
+        <p>Declare a fresh context before a captured record using its disclosure. This is your declaration; reset coverage remains unknown.</p>
+        <button id="remove-boundary" type="button" hidden>Remove this declared boundary</button>
+        <p id="boundary-status" role="status"></p>
+      </section>
+      <div class="workspace">
+        <section><h2>Recorded supplied content</h2><p class="muted">Captured instructions and user messages. Timing is shown per record; this is not a complete startup inventory.</p><div id="supplied"></div></section>
+        <section><h2>Recorded activity</h2><p class="muted">Assistant reports, tool calls, captured outputs and events. A call alone does not prove a source was read.</p><div id="activity"></div></section>
+      </div>
+    </div>
+  </article>
+</main>
+<noscript>Enable JavaScript to choose a session and inspect its recorded evidence.</noscript>
+</body>
+</html>

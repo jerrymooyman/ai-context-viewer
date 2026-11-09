@@ -1,0 +1,65 @@
+{
+  "envelope_version": 1,
+  "project_root": "/example/project",
+  "session_id": "example-session",
+  "task_ref": "/example/project/docs/progress.md",
+  "context_binding": {
+    "version": 1,
+    "kind": "initial"
+  },
+  "exported_at": "2026-11-08T00:00:00+00:00",
+  "snapshot": {
+    "schema_version": 1,
+    "snapshot_id": "s1",
+    "goal_id": "g1",
+    "scope": "goal",
+    "supersedes": null,
+    "goal": {
+      "objective": "Inspect the task understanding and its origins",
+      "constraints": [
+        "Read only"
+      ],
+      "questions": [
+        "Coverage?"
+      ]
+    },
+    "subtasks": [
+      {
+        "id": "a",
+        "title": "Inspect assumptions",
+        "dependencies": [],
+        "progress": "planned"
+      },
+      {
+        "id": "b",
+        "title": "Check supporting evidence",
+        "dependencies": [
+          "a"
+        ],
+        "progress": "planned"
+      }
+    ],
+    "claims": [
+      {
+        "id": "claim-goal",
+        "scope": "goal",
+        "statement": "An assumption",
+        "kind": "assumption",
+        "source_ids": [
+          "source1"
+        ],
+        "verification": {
+          "status": "unknown",
+          "evidence_keys": []
+        }
+      }
+    ],
+    "sources": [
+      {
+        "id": "source1",
+        "title": "Reported source",
+        "evidence_keys": []
+      }
+    ]
+  }
+}

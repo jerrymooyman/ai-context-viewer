@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "s1",
+  "goal_id": "g1",
+  "scope": "goal",
+  "supersedes": null,
+  "goal": {
+    "objective": "Inspect the task understanding and its origins",
+    "constraints": [
+      "Read only"
+    ],
+    "questions": [
+      "Coverage?"
+    ]
+  },
+  "subtasks": [
+    {
+      "id": "a",
+      "title": "Inspect assumptions",
+      "dependencies": [],
+      "progress": "planned"
+    },
+    {
+      "id": "b",
+      "title": "Check supporting evidence",
+      "dependencies": [
+        "a"
+      ],
+      "progress": "planned"
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-goal",
+      "scope": "goal",
+      "statement": "An assumption",
+      "kind": "assumption",
+      "source_ids": [
+        "source1"
+      ],
+      "verification": {
+        "status": "unknown",
+        "evidence_keys": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "source1",
+      "title": "Reported source",
+      "evidence_keys": []
+    }
+  ]
+}

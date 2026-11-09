@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Install/remove only this checkout's launcher and explicit snapshot skill."""
+import argparse
+import os
+from pathlib import Path
+import shlex
+import sys
+import tempfile
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def exists(path):
+    return path.exists() or path.is_symlink()
+
+
+def wrapper():
+    # Shell quoting handles spaces and metacharacters in interpreter/source paths.
+    return ('#!/bin/sh\n# ai-context-viewer managed launcher\nexec ' + shlex.quote(sys.executable)
+            + ' ' + shlex.quote(str(ROOT / 'scripts/ai-context-viewer')) + ' "$@"\n').encode()
+
+
+def install(bin_dir, skills_dir, *, uninstall=False):
+    command = bin_dir / 'ai-context-viewer'
+    skill = skills_dir / 'snapshot-session'
+    target = ROOT / 'skills/snapshot-session'
+    content = wrapper()
+    # Preflight both targets before creating/removing either one. Do not follow a
+    # user-command symlink or mistake an unrelated skill directory for our own.
+    owned_command = (command.is_file() and not command.is_symlink() and command.read_bytes() == content)
+    owned_skill = skill.is_symlink() and os.readlink(skill) == str(target)
+    for path, owned in ((command, owned_command), (skill, owned_skill)):
+        if exists(path) and not owned:
+            raise ValueError(f'Refusing unrelated or modified destination: {path}')
+    if uninstall:
+        for path, owned in ((command, owned_command), (skill, owned_skill)):
+            if owned:
+                path.unlink()
+                print(f'Removed {path}')
+        return
+    if not (target / 'SKILL.md').is_file() or not (ROOT / 'scripts/ai-context-viewer').is_file():
+        raise ValueError('Installation sources are missing; use a complete checkout.')
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    skills_dir.mkdir(parents=True, exist_ok=True)
+    # Stage executable bytes before publication; hard-linking refuses overwrite.
+    temporary = None
+    created = []
+    try:
+        if not owned_command:
+            fd, temporary = tempfile.mkstemp(prefix='.ai-context-viewer-', dir=bin_dir)
+            with os.fdopen(fd, 'wb') as stream:
+                stream.write(content)
+                stream.flush()
+                os.fchmod(stream.fileno(), 0o755)
+                os.fsync(stream.fileno())
+            os.link(temporary, command)
+            created.append((command, command.lstat().st_ino))
+        if not owned_skill:
+            skill.symlink_to(target, target_is_directory=True)
+            created.append((skill, skill.lstat().st_ino))
+    except OSError:
+        for path, inode in reversed(created):
+            if exists(path) and path.lstat().st_ino == inode:
+                path.unlink()
+        raise
+    finally:
+        if temporary is not None:
+            Path(temporary).unlink(missing_ok=True)
+    print(f'Launcher: {command}\nSkill: {skill} -> {target}')
+    print(f'Python: {sys.executable}\nKeep this checkout in place. Add {bin_dir} to PATH if needed.')
+    print('To remove these exact entries: rerun this installer with the same directories and --uninstall.')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--bin-dir', type=Path, default=Path.home() / '.local/bin')
+    parser.add_argument('--skills-dir', type=Path, default=Path.home() / '.agents/skills')
+    parser.add_argument('--identity-verified', action='store_true', help='Attest that the disposable CLI identity matrix in docs/client-identity-check.md passed. Does not run those checks.')
+    parser.add_argument('--uninstall', action='store_true', help='Remove only unchanged entries owned by this checkout.')
+    args = parser.parse_args()
+    try:
+        if sys.version_info < (3, 10):
+            raise ValueError('Python 3.10 or newer is required.')
+        if not args.uninstall and not args.identity_verified:
+            raise ValueError('Client identity gate pending. Complete docs/client-identity-check.md before installing; --identity-verified records your confirmation.')
+        install(args.bin_dir.absolute(), args.skills_dir.absolute(), uninstall=args.uninstall)
+        return 0
+    except (ValueError, OSError) as error:
+        print(f'Install error: {error}', file=sys.stderr)
+        return 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

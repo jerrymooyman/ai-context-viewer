@@ -1,0 +1,11 @@
+{
+  "name": "ai-context-viewer",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/web/*.test.mjs"
+  },
+  "description": "Development tooling for the Python and plain-JavaScript context viewer",
+  "devDependencies": {
+    "playwright": "^1.65.0"
+  }
+}

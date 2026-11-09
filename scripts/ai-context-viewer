@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Locate the application without changing the caller's project directory."""
+from pathlib import Path
+import runpy
+import sys
+
+
+def main():
+    if sys.version_info < (3, 10):
+        raise SystemExit('ai-context-viewer requires Python 3.10 or newer.')
+    root = Path(__file__).resolve().parents[1]
+    if not (root / 'viewer/__main__.py').is_file():
+        raise SystemExit('Viewer source is unavailable; reinstall from its current location.')
+    sys.path.insert(0, str(root))
+    module = 'viewer'
+    if sys.argv[1:2] == ['--export-snapshot']:
+        module = 'viewer.export_snapshot'
+        del sys.argv[1]
+        if not any(arg == '--state-file' or arg.startswith('--state-file=') for arg in sys.argv[1:]):
+            sys.argv.extend(['--state-file', str(root / '.local/state.json')])
+    runpy.run_module(module, run_name='__main__', alter_sys=True)
+
+
+if __name__ == '__main__':
+    main()

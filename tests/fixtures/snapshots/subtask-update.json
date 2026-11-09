@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "s2",
+  "goal_id": "g1",
+  "scope": "a",
+  "supersedes": "s1",
+  "goal": null,
+  "subtasks": [
+    {
+      "id": "a",
+      "title": "Inspect assumptions",
+      "dependencies": [],
+      "progress": "in_progress"
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-a",
+      "scope": "a",
+      "statement": "An assumption",
+      "kind": "assumption",
+      "source_ids": [
+        "source1"
+      ],
+      "verification": {
+        "status": "unknown",
+        "evidence_keys": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "source1",
+      "title": "Reported source",
+      "evidence_keys": []
+    }
+  ]
+}

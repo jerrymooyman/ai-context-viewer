@@ -1,0 +1,8 @@
+{"timestamp":"2026-11-08T01:00:00Z","type":"session_meta","payload":{"id":"synthetic-explorer","cli_version":"0.167.0","source":"vscode","originator":"codex-tui","cwd":"/sample/editor-config","base_instructions":{"text":"Synthetic fixture. Keep source logs read-only."}}}
+{"timestamp":"2026-11-08T01:00:01Z","type":"response_item","payload":{"type":"message","role":"developer","content":[{"type":"input_text","text":"Use zsh. Verify the active explorer before changing shortcuts."}]}}
+{"timestamp":"2026-11-08T01:00:02Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"Inspect the shortcut. Literal hostile markup: <img src=x onerror=alert('fixture')>. Unicode: café 🦜."}]}}
+{"timestamp":"2026-11-08T01:00:03Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"I will check the active explorer. This message is self-report, not a validated understanding snapshot."}]}}
+{"timestamp":"2026-11-08T01:00:04Z","type":"response_item","payload":{"type":"custom_tool_call","name":"exec_command","call_id":"fixture-call","input":"cat config/explorer.lua"}}
+{"timestamp":"2026-11-08T01:00:05Z","type":"response_item","payload":{"type":"custom_tool_call_output","call_id":"fixture-call","output":"Synthetic captured output: configured explorer = Snacks. This does not independently establish the running explorer."}}
+{"timestamp":"2026-11-08T01:00:06Z","type":"event_msg","payload":{"type":"task_complete","last_agent_message":"Fixture complete"}}
+{"timestamp":"2026-11-08T01:00:07Z","type":"future_record","payload":{"note":"Unknown event remains visible without invented source attribution."}}
