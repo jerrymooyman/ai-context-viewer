@@ -9,3 +9,4 @@ node_modules/
 docs/research/
 
 docs/client-identity-check.md
+/.session-snapshots/
