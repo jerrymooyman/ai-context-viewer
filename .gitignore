@@ -1,0 +1,11 @@
+_flow/current.md
+.local/
+__pycache__/
+*.py[cod]
+
+node_modules/
+/.session-snapshots/
+
+docs/research/
+
+docs/client-identity-check.md
