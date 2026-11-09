@@ -1,4 +1,4 @@
-import { selection, beginSelection, beginPoll, acceptView, renderRecords, snapshotModel, snapshotRequest, scopedSources, correctionText, copyEditable, dateGroups, capturedSourceText, taskGroups } from './model.mjs';
+import { selection, beginSelection, beginPoll, acceptView, renderRecords, snapshotModel, snapshotRequest, scopedSources, correctionText, copyEditable, dateGroups, taskGroups } from './model.mjs';
 
 const state = selection();
 const element = id => document.getElementById(id);
@@ -422,20 +422,21 @@ function renderSources(view) {
     details.append(node('summary',`${source.id || 'Unassigned'} · ${source.title}`),
       node('p',`${source.origin} · ${source.relevance}. Linked claims: ${source.claims.join(', ') || 'None'}.`));
     if (source.id) {
-      const fileLink = node('a', 'Open source file in new tab');
+      const open = node('button', 'Open local file');
+      const status = node('p'); status.setAttribute('role', 'status');
       const collection = view.stream === 'files' ? 'file-histories' : 'contexts';
-      fileLink.href = `/api/${collection}/${encodeURIComponent(view.id)}?source=${encodeURIComponent(source.id)}`;
-      fileLink.target = '_blank'; fileLink.rel = 'noopener noreferrer';
-      details.append(fileLink, node('p', 'Opens the current local file; it may differ from the captured evidence.', 'muted'));
+      open.type = 'button';
+      open.addEventListener('click', async () => {
+        open.disabled = true; status.textContent = 'Opening local file…';
+        try {
+          await post(`/api/${collection}/${encodeURIComponent(view.id)}/open-local`, JSON.stringify({source_id: source.id}));
+          status.textContent = 'Opened with your default application.';
+        } catch (error) {
+          status.textContent = error.message;
+        } finally { open.disabled = false; }
+      });
+      details.append(open, node('p', 'Opens the current local file with your default application; it may differ from captured evidence.', 'muted'), status);
     }
-    const open = node('button', 'Open captured source in new tab');
-    open.type = 'button';
-    open.addEventListener('click', () => {
-      const url = URL.createObjectURL(new Blob([capturedSourceText(view, source)], {type: 'text/plain;charset=utf-8'}));
-      window.open(url, '_blank', 'noopener,noreferrer');
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    });
-    details.append(open);
     for (const match of source.matches) {
       details.append(node('p',`${match.status} · ${match.content_kind} · ${match.observed_at || 'Time unknown'} · coverage: ${match.coverage}`),
         node('small',`Record ${match.key} · ${match.version}`),node('pre',match.text || 'Captured content unavailable.'));

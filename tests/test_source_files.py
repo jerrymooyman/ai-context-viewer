@@ -32,3 +32,34 @@ class SourceFileTests(unittest.TestCase):
             for title in ['escape.md', 'binary.md', 'large.md']:
                 with self.assertRaises(ValueError):
                     read_source_file({'sources': [{'id': 's', 'title': title}]}, 's', root)
+
+    def test_descriptive_and_embedded_file_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'guide.md').write_text('# Decorated source')
+            for title in ['guide.md — active progress document',
+                          f'User-provided skill and {root}/guide.md']:
+                with self.subTest(title=title):
+                    text = read_source_file({'sources': [{'id': 's', 'title': title}]}, 's', root)
+                    self.assertIn('# Decorated source', text)
+
+    def test_viewer_owned_reference_from_another_project(self):
+        path = Path(__file__).resolve().parents[1] / 'skills/snapshot-session/references/report-format.md'
+        with tempfile.TemporaryDirectory() as directory:
+            text = read_source_file({'sources': [{'id': 's', 'title': str(path)}]}, 's', directory)
+            self.assertIn(path.read_text(), text)
+
+    def test_literal_filename_with_spaces_and_description_separator(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            name = 'guide with spaces.md — literal filename'
+            (root / name).write_text('Exact filename wins')
+            text = read_source_file({'sources': [{'id': 's', 'title': name}]}, 's', root)
+            self.assertIn('Exact filename wins', text)
+
+    def test_decorated_paths_still_reject_escape(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for title in ['/etc/passwd — description', 'Read /etc/passwd',
+                          'Read /etc/passwd and /etc/hosts']:
+                with self.subTest(title=title), self.assertRaises(ValueError):
+                    read_source_file({'sources': [{'id': 's', 'title': title}]}, 's', directory)

@@ -7,7 +7,7 @@ from urllib.parse import unquote, urlsplit, parse_qs
 from .contexts import ContextStore, FileContexts
 from .logs import discover_sessions
 from .snapshots import parse_snapshot
-from .source_files import read_source_file
+from .source_files import read_source_file, open_source_file
 
 WEB_ROOT = Path(__file__).resolve().parent.parent / 'web'
 ASSETS = {'/': ('index.html', 'text/html'), '/styles.css': ('styles.css', 'text/css'),
@@ -172,8 +172,9 @@ def make_server(log_root: Path, port: int = 8765, state_file=None, *, project=No
                 return
             collect = parsed.path == '/api/collect'
             file_flag = len(parts) == 4 and parts[:2] == ['api','file-histories'] and parts[3] == 'flags'
+            local_open = len(parts) == 4 and parts[:2] in (['api', 'file-histories'], ['api', 'contexts']) and parts[3] == 'open-local'
             new_import = parsed.path == '/api/import-contexts'
-            if not collect and not file_flag and not new_import and (len(parts) != 4 or parts[:2] != ['api', 'contexts']
+            if not collect and not file_flag and not local_open and not new_import and (len(parts) != 4 or parts[:2] != ['api', 'contexts']
                                    or parts[3] not in ('boundaries', 'imports', 'flags')):
                 self.respond(405, {'error': 'Unknown mutation route.'})
                 return
@@ -181,6 +182,22 @@ def make_server(log_root: Path, port: int = 8765, state_file=None, *, project=No
                 if self.headers.get_content_type() != 'application/json':
                     raise ValueError('Expected application/json.')
                 raw = self.rfile.read(int(self.headers.get('Content-Length', 0))).decode('utf-8')
+                if local_open:
+                    body = parse_snapshot(raw)
+                    if not isinstance(body, dict) or set(body) != {'source_id'} or not isinstance(body['source_id'], str):
+                        raise ValueError('Supply a source_id.')
+                    if parts[1] == 'file-histories':
+                        if not files: raise ValueError('No project configured.')
+                        view = files.view(parts[2], discover_sessions(root))
+                        project = selected_project
+                    else:
+                        summary = next((s for s in summaries() if any(c['id'] == parts[2] for c in store.list_contexts(s))), None)
+                        if not summary: raise ValueError('Context unavailable.')
+                        view = store.view(summary, parts[2])
+                        project = selected_project or summary.project
+                    open_source_file(view, body['source_id'], project)
+                    self.respond(200, {'opened': True})
+                    return
                 if collect:
                     if parse_snapshot(raw) != {}: raise ValueError('Collect takes an empty object.')
                     if files: files.collect()
