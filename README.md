@@ -20,10 +20,10 @@ Without `--log-root`, logs come from `$CODEX_HOME/sessions`, or `~/.codex/sessio
 
 ## Snapshot files and optional user-wide commands
 
-Run the source launcher from the project you want to inspect:
+Run the source launcher from the project you want to inspect, replacing `/path/to/ai-context-viewer` with this checkout’s location:
 
 ```sh
-python3 /home/jerry/repos/private/ai-context-viewer/scripts/ai-context-viewer
+python3 /path/to/ai-context-viewer/scripts/ai-context-viewer
 ```
 
 The caller directory selects the exact project; `--project /path/to/project` overrides it. The launcher locates this application's sources without changing cwd. Initial load and Refresh collect that project's saved reports. Choose task, session and context, then the **Files** or **Log/import** understanding stream. Files are the default when valid saved reports exist. File history survives restart through a separate SQLite ledger; imports remain temporary.

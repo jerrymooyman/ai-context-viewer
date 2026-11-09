@@ -17,7 +17,6 @@ A snapshot is an agent report. Captured evidence can show that content was suppl
 From the project root, run:
 
 ```sh
-cd /home/jerry/repos/private/ai-context-viewer
 python3 -m viewer --state-file .local/state.json --port 8765
 ```
 
