@@ -117,6 +117,20 @@ class ServerTests(unittest.TestCase):
         self.assertIn(b'# Actual markdown\n<script>literal</script>', body)
         self.assertIn(b'not historical captured evidence', body)
         self.assertEqual(self.request(url + '?source=missing')[0], 400)
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        with patch('viewer.source_files.subprocess.run', return_value=SimpleNamespace(returncode=0)) as launch:
+            status, _, body = self.request(url + '/open-local', 'POST', {'Content-Type':'application/json'}, json.dumps({'source_id':'source-file'}))
+            self.assertEqual(status, 200, body)
+            self.assertEqual(launch.call_args.args[0], ['xdg-open', str(self.root / 'guide.md')])
+            launch.reset_mock()
+            for payload in [{'source_id':'missing'}, {'path':'/etc/passwd'}, {'source_id':'source-file','path':'/etc/passwd'}]:
+                self.assertEqual(self.request(url + '/open-local', 'POST', {'Content-Type':'application/json'}, json.dumps(payload))[0], 400)
+            self.assertEqual(self.request(url + '/open-local', 'POST', {'Content-Type':'application/json','Origin':'https://foreign.invalid'}, '{"source_id":"source-file"}')[0], 403)
+            launch.assert_not_called()
+        with patch('viewer.source_files.subprocess.run', return_value=SimpleNamespace(returncode=1)):
+            self.assertEqual(self.request(url + '/open-local', 'POST', {'Content-Type':'application/json'}, '{"source_id":"source-file"}')[0], 400)
+
 
     def test_all_browser_assets_are_served(self):
         self.assertEqual(self.server.server_address[0], '127.0.0.1')

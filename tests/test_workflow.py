@@ -225,6 +225,24 @@ class FileWorkflowTests(unittest.TestCase):
             context_binding=binding, log_root=self.logs, state_file=self.state)
         return json.loads(path.read_text())['snapshot']['snapshot_id']
 
+    def test_file_history_opens_referenced_local_file(self):
+        from unittest.mock import patch
+        from types import SimpleNamespace
+        payload = json.loads(Path('tests/fixtures/snapshots/goal.json').read_text())
+        payload['sources'][0]['title'] = 'guide.md — current guide'
+        target = self.project / 'guide.md'
+        target.write_text('# Local guide')
+        self.export(snapshot=payload)
+        history = self.collect()['file_histories'][0]
+        route = '/api/file-histories/' + history['history_id'] + '/open-local'
+        with patch('viewer.source_files.subprocess.run', return_value=SimpleNamespace(returncode=0)) as launch:
+            status, body = self.request(route, {'source_id':payload['sources'][0]['id']})
+            self.assertEqual(status, 200, body)
+            self.assertEqual(launch.call_args.args[0], ['xdg-open', str(target)])
+            launch.reset_mock()
+            self.assertEqual(self.request(route, {'source_id':'missing'})[0], 400)
+            launch.assert_not_called()
+
     def test_export_waits_for_collection_restart_and_exact_project_scope(self):
         before = hashlib.sha256(self.path.read_bytes()).hexdigest()
         self.assertEqual(len(self.get('/api/sessions')['sessions']), 2)
